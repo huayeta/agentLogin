@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>member</title>
+</head>
+<body>
+    <ul>
+        {% for item in items %}
+        <li><a href="{{item.url}}" target="_blank">{{item.title}}</a></li>
+        {% endfor %}
+    </ul>
+    一共 {{pageMax}} 页
+</body>
+</html>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript">
+    // $.ajax({
+    //     url:'./get_info',
+    //     success:function(ret){
+    //         console.log(ret);
+    //     }
+    // })
+    $.ajax({
+        url:'/apply/556535',
+        success:function(ret){
+            console.log(ret);
+        }
+    })
+</script>

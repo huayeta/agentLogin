@@ -13,11 +13,11 @@ const querystring=require('querystring')
 app.use(bodyParser());
 
 // 解析静态目录
-app.use(serve('.'));
+app.use(serve('./public/'));
 
 // 渲染方法
 app.context.render=render({
-    root:'./',
+    root:'./views/',
     autoescape:true,
     cache:false,
     ext:'htm'
@@ -38,20 +38,13 @@ let headers={
 //域名
 const HOST='http://www.shikee.com/';
 
+// 首页
 router.get('/',function* (next){
-
-    let loginHtml=yield fetch('http://login.shikee.com/',{
-        method:'GET',
-    }).then(function(res){
-        return res.text();
-    })
-
-    // let $=cheerio.load(loginHtml);
-
 
     this.body=yield this.render('app');
 })
 
+// 登陆
 router.post('/',function* (next){
     let body=this.request.body;
 
@@ -63,7 +56,7 @@ router.post('/',function* (next){
         let cookies=res.headers._headers['set-cookie'];
         let result='';
         if(cookies){
-            console.log(cookies);
+            // console.log(cookies);
             for(let i in cookies){
                 let tmp=cookies[i];
                 let tmpResult=/(.+?=.+?;)/.exec(tmp);
@@ -83,17 +76,49 @@ router.get('/app_member',function* (next){
 
     if(!headers.Cookie)return this.redirect('/');
 
-    // let response=yield fetch(HOST+'home_new/get_sellerinfo',{
-    //     method:'GET',
-    //     headers:headers
-    // }).then(function(res){
-    //     return res.json();
-    // })
-    // console.log(response);
+    let response=yield fetch('http://list.shikee.com/list-1.html?type=1',{
+        method:'GET',
+        headers:headers
+    }).then(function(res){
+        return res.text();
+    })
+    const $=cheerio.load(response);
+    let $items=$('.maxPicList .item');
+    let pageMax=$('#J_page .go-page').text().match(/\d+/)[0];
+    let items=[];
+    $items.each(function(i,item){
+        let $a=$(this).find('h4 a');
+        let url=$a.attr('href');
+        let title=$a.text();
+        items.push({url:url,title:title})
+    })
 
-    this.body=yield this.render('app_member',{headers:headers});
+    this.body=yield this.render('app_member',{items:items,pageMax:pageMax});
 })
 
+router.get('/apply/:id',function* (next){
+    let id=this.params.id;
+    if(!id)return this.body={success:false,info:{data:'id不存在'}};
+    let info=yield fetch('http://platinum.shikee.com/data/'+id,{
+        method:'GET',
+        headers:headers
+    }).then(function(res){
+        return res.text();
+    })
+    info=JSON.parse(info.match(/\{.*\}/)[0]);
+    if(info.is_apply==true){return this.body={success:false,info:{data:'已经申请过'}};}
+    let response=yield fetch('http://detail.shikee.com/detail/apply/'+id+'?callback=jQuery110209388106574770063_1452939615305',{
+        method:'POST',
+        headers:headers,
+        body:{cache_key:id}
+    }).then(function(res){
+        return res.text();
+    });
+
+    this.body=response;
+})
+
+//获得会员的信息
 router.get('/get_info',function* (next){
     let response=yield fetch(HOST+'home_new/get_sellerinfo',{
         method:'GET',
