@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>app</title>
+</head>
+<body>
+<form class="" action="./" method="post">
+    <div>用户名：<input type="text" name="username" value="huayeta"></div>
+    <div>密码：<input type="password" name="password" value="1c5d1091545b49bde228a16b88ff6c1cdd497aa55ed7f9bb9702107814c01f00cb10a24072e17abd3939471c7dda666f9a1aedf6d4704144423e4fa0beae551758e446f17bacdfcac5af731449f441b87f41ba4533960d81139edd4ebf0a9e75a0070905a4ca511934cb9e5bb968c3041f16821a0200142116907f29277d6e20"></div>
+    <div><input type="submit" value="登陆"></div>
+</form>
+</body>
+</html>
+<script src="./node_modules/jquery/dist/jquery.js"></script>
+<script type="text/javascript">
+    $('form').submit(function(){
+        $.ajax({
+            method:'POST',
+            url:'./',
+            data:$('form').serialize(),
+            success:function(ret){
+                if(ret.success){
+                    location.href='/app_member';
+                }else{
+                    alert(ret.data);
+                }
+            }
+        })
+        return false;
+    });
+</script>
