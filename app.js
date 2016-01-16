@@ -93,7 +93,7 @@ router.get('/app_member',function* (next){
         items.push({url:url,title:title})
     })
 
-    this.body=yield this.render('app_member',{items:items,pageMax:pageMax});
+    this.body=yield this.render('app_member',{headers:headers,items:items,pageMax:pageMax});
 })
 
 router.get('/apply/:id',function* (next){

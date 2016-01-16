@@ -5,6 +5,7 @@
     <title>member</title>
 </head>
 <body>
+    {{headers.Cookie}}
     <ul>
         {% for item in items %}
         <li><a href="{{item.url}}" target="_blank">{{item.title}}</a></li>
