@@ -35,6 +35,9 @@ let headers={
     "User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2526.111 Safari/537.36"
 }
 
+// 请求cookie
+let COOKIES;
+
 //域名
 const HOST='http://www.shikee.com/';
 
@@ -65,6 +68,7 @@ router.post('/',function* (next){
                 }
             }
         }
+        COOKIES=result;
         headers.Cookie=result;
         return res.json();
     })
@@ -99,17 +103,32 @@ router.get('/app_member',function* (next){
 router.get('/apply/:id',function* (next){
     let id=this.params.id;
     if(!id)return this.body={success:false,info:{data:'id不存在'}};
+
+    yield fetch('http://platinum.shikee.com/'+id+'.html',{
+        method:'GET',
+        headers:headers
+    }).then(function(res){
+        return res.text();
+    });
+    //获取是否申请过
     let info=yield fetch('http://platinum.shikee.com/data/'+id,{
         method:'GET',
         headers:headers
     }).then(function(res){
         return res.text();
-    })
+    });
     info=JSON.parse(info.match(/\{.*\}/)[0]);
+    let nowDate=parseInt(info.now);
+    let tmpCookies=COOKIES+'Hm_lpvt_f5b004b0742ab157215b881269b4a6fa='+nowDate+';Hm_lvt_f5b004b0742ab157215b881269b4a6fa=1453078633,1453080255,1453080257,1453080333';
+    let tmpHeaders=Object.assign({},headers,{Cookie:tmpCookies});
     if(info.is_apply==true){return this.body={success:false,info:{data:'已经申请过'}};}
-    let response=yield fetch('http://detail.shikee.com/detail/apply/'+id+'?callback=jQuery110209388106574770063_1452939615305',{
+    // yield new Promise(function(resolve,reject){
+    //     setTimeout(()=>{resolve();},10000)
+    // })
+    // 申请
+    let response=yield fetch('http://detail.shikee.com/detail/apply/'+id,{
         method:'POST',
-        headers:headers,
+        headers:tmpHeaders,
         body:{cache_key:id}
     }).then(function(res){
         return res.text();
